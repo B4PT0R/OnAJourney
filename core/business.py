@@ -10,6 +10,9 @@ from datetime import datetime, date, time, timedelta
 from typing import Dict, List, Optional, Any
 from zoneinfo import ZoneInfo
 from core.database import create_database
+from core.restrict_module import restrict_module
+
+restrict_module('streamlit',restricted_attributes=['secrets'])
 
 # Database
 database = create_database()

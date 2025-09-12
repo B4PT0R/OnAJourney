@@ -111,12 +111,12 @@ class MongoDatabase(DatabaseInterface):
         return user
 
 # Factory function to create database instance
-def create_database() -> DatabaseInterface:
+def create_database(local=False) -> DatabaseInterface:
     """Create database instance based on environment or config"""
     import streamlit as st
     # Check for MongoDB connection string in environment
     mongo_uri = st.secrets.get('MONGODB_URI') or os.getenv('MONGODB_URI')
-    if mongo_uri:
+    if mongo_uri and not local:
         return MongoDatabase(mongo_uri)
     
     # Default to TinyDB

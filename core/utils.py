@@ -11,7 +11,7 @@ def rerun():
 
 def check_rerun():
     """Check if rerun was requested and execute it"""
-    if state.get('rerun'):
+    if state.get('rerun',False):
         state.rerun = False
         st.rerun()
 

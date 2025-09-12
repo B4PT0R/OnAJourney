@@ -584,6 +584,7 @@ with b:
     challenge_globals["validate"] = lambda success: _validate_challenge(user, challenge_data, success)
     
     try:
+        code=compile(code,mode="exec",filename="user")
         exec(code, challenge_globals)
         update_user(user)
     except Exception as e:
