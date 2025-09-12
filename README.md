@@ -55,8 +55,8 @@ The framework's flexibility enables diverse applications:
 
 - Python 3.8+
 - Streamlit
-- TinyDB
-- Plotly
+- TinyDB (for local test)
+- MongoDB (for cloud use)
 
 ### Setup
 
