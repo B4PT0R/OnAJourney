@@ -1,0 +1,4 @@
+streamlit
+tinydb  
+pymongo
+streamlit-code-editor
