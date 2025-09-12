@@ -1,0 +1,114 @@
+{
+  "title": "Academy Path Choice",
+  "description": "A simple branching adventure demonstrating the achievement system",
+  "intro_text": "Welcome to the Academy! You'll explore different disciplines and choose your specialization. Your journey will shape your destiny.",
+  "success_text": "Congratulations! You have mastered your chosen path and graduated from the Academy.",
+  "failure_text": "Your academy journey ends here, but you can always start fresh with new wisdom.",
+  "initial_avatar": "{\"health\": 100, \"mana\": 50, \"strength\": 10, \"magic\": 10, \"discipline\": \"none\"}",
+  "initial_world": "{\"location\": \"academy\", \"chosen_path\": \"none\"}",
+  "chapters": {
+    "1": {
+      "title": "Exploration",
+      "description": "Discover the academy and explore different disciplines",
+      "intro": "**Chapter 1: Exploration Day**\n\nYour first day at the Academy! You can explore different areas to get a feel for what interests you. There's no pressure to decide anything yet.",
+      "challenges": [
+        {
+          "title": "Visit the Training Grounds",
+          "description": "Check out where the warriors train with weapons and physical conditioning.",
+          "difficulty": "easy",
+          "code": "st.write(\"You watch students practicing sword forms and strength exercises.\")\n\nif st.button(\"💪 Try some exercises\"):\n    avatar['strength'] += 2\n    new_achievement('explored_combat', 'Combat Explorer', 'You explored the martial training grounds')\n    st.success(\"You feel stronger! +2 Strength\")\n    validate(True)",
+          "depends_on": []
+        },
+        {
+          "title": "Visit the Magic Library",
+          "description": "Explore the vast collection of spellbooks and magical artifacts.",
+          "difficulty": "easy",
+          "code": "st.write(\"You browse through ancient tomes filled with mystical knowledge.\")\n\nif st.button(\"📚 Study some basics\"):\n    avatar['magic'] += 2\n    new_achievement('explored_magic', 'Magic Explorer', 'You explored the arcane library')\n    st.success(\"You feel more attuned to magic! +2 Magic\")\n    validate(True)",
+          "depends_on": []
+        }
+      ],
+      "required_level": 1,
+      "depends_on": []
+    },
+    "2": {
+      "title": "Warrior Path",
+      "description": "Join the Warrior School and commit to martial excellence",
+      "intro": "**Chapter 2A: Warrior Commitment**\n\nTime to make your first major decision! The Warrior Master offers you specialized training in combat and physical prowess.\n\n*This choice will determine your academy specialization.*",
+      "challenges": [
+        {
+          "title": "Join the Warrior School",
+          "description": "Commit to the path of martial excellence and physical mastery.",
+          "difficulty": "medium",
+          "code": "st.write(\"The Warrior Master extends a training sword toward you.\")\nst.warning(\"⚔️ This will set your specialization!\")\n\nif st.button(\"⚔️ Accept Warrior Training\"):\n    avatar['discipline'] = 'warrior'\n    avatar['strength'] += 5\n    world['chosen_path'] = 'warrior'\n    new_achievement('warrior_student', 'Warrior Student', 'You joined the Warrior School')\n    st.success(\"You are now a Warrior Student! +5 Strength\")\n    validate(True)",
+          "depends_on": []
+        }
+      ],
+      "required_level": 2,
+      "depends_on": []
+    },
+    "3": {
+      "title": "Mage Path",
+      "description": "Join the Mage School and commit to arcane mastery",
+      "intro": "**Chapter 2B: Mage Commitment**\n\nTime to make your first major decision! The Archmage offers you specialized training in magic and mystical arts.\n\n*This choice will determine your academy specialization.*",
+      "challenges": [
+        {
+          "title": "Join the Mage School",
+          "description": "Commit to the path of arcane knowledge and magical power.",
+          "difficulty": "medium",
+          "code": "st.write(\"The Archmage offers you a crystal focus that pulses with energy.\")\nst.warning(\"🔮 This will set your specialization!\")\n\nif st.button(\"🔮 Accept Mage Training\"):\n    avatar['discipline'] = 'mage'\n    avatar['magic'] += 5\n    world['chosen_path'] = 'mage'\n    new_achievement('mage_student', 'Mage Student', 'You joined the Mage School')\n    st.success(\"You are now a Mage Student! +5 Magic\")\n    validate(True)",
+          "depends_on": []
+        }
+      ],
+      "required_level": 2,
+      "depends_on": []
+    },
+    "4": {
+      "title": "Advanced Warrior",
+      "description": "Master advanced combat techniques and battle tactics",
+      "intro": "**Chapter 3A: Advanced Warrior Training**\n\nNow that you're committed to the warrior path, it's time for serious combat training. Master the advanced techniques of battle.",
+      "challenges": [
+        {
+          "title": "Advanced Combat Training",
+          "description": "Master advanced sword techniques and battle tactics.",
+          "difficulty": "hard",
+          "code": "st.write(\"Intensive training session with the Weapon Masters.\")\nst.write(f\"Current Strength: {avatar.get('strength', 0)}\")\n\nif st.button(\"🗡️ Train intensively\"):\n    avatar['strength'] += 8\n    avatar['health'] += 20\n    new_achievement('warrior_graduate', 'Warrior Graduate', 'You completed advanced warrior training')\n    new_achievement('ready_for_mastery', 'Ready for Mastery', 'You are prepared for the final trials')\n    st.success(\"Warrior training complete! +8 Strength, +20 Health\")\n    validate(True)",
+          "depends_on": []
+        }
+      ],
+      "required_level": 3,
+      "depends_on": ["warrior_student"]
+    },
+    "5": {
+      "title": "Advanced Mage",
+      "description": "Master complex spells and advanced magical theory",
+      "intro": "**Chapter 3B: Advanced Mage Training**\n\nNow that you're committed to the mage path, it's time for serious magical study. Master the advanced arts of spellcasting.",
+      "challenges": [
+        {
+          "title": "Advanced Spell Training",
+          "description": "Master complex spells and magical theory.",
+          "difficulty": "hard",
+          "code": "st.write(\"Deep study session with the Archmage Council.\")\nst.write(f\"Current Magic: {avatar.get('magic', 0)}\")\n\nif st.button(\"✨ Study intensively\"):\n    avatar['magic'] += 8\n    avatar['mana'] += 30\n    new_achievement('mage_graduate', 'Mage Graduate', 'You completed advanced magical training')\n    new_achievement('ready_for_mastery', 'Ready for Mastery', 'You are prepared for the final trials')\n    st.success(\"Magical training complete! +8 Magic, +30 Mana\")\n    validate(True)",
+          "depends_on": []
+        }
+      ],
+      "required_level": 3,
+      "depends_on": ["mage_student"]
+    },
+    "6": {
+      "title": "Final Trial",
+      "description": "Face the Academy Champion to prove your mastery",
+      "intro": "**Chapter 4: Academy Graduation**\n\nYou have completed your specialized training and are ready for the final academy trials. Time to graduate as a Master!",
+      "challenges": [
+        {
+          "title": "Final Combat Trial",
+          "description": "Face the Academy Champion in single combat to prove your mastery.",
+          "difficulty": "hard",
+          "code": "discipline = avatar.get('discipline', 'none')\nstrength = avatar.get('strength', 0)\nmagic = avatar.get('magic', 0)\n\nif discipline == 'none':\n    st.error(\"You must complete your specialization first!\")\n    validate(False)\n    st.stop()\n\nst.markdown(\"### ⚔️ Final Combat Trial\")\nst.write(\"A mysterious Academy Champion appears, ready to test your mastery!\")\nst.write(f\"**Your stats:** Strength: {strength}, Magic: {magic}\")\nst.write(f\"**Your discipline:** {discipline.title()}\")\n\nst.divider()\nst.write(\"Choose your approach to defeat the Champion:\")\n\ncol1, col2 = st.columns(2)\n\nwith col1:\n    if st.button(\"⚔️ Physical Attack\", use_container_width=True):\n        if discipline == 'warrior':\n            st.success(\"🏆 Victory! Your warrior training serves you well!\")\n            st.write(f\"Your {strength} Strength overwhelms the Champion!\")\n            new_achievement('academy_master', 'Academy Master', 'You defeated the Champion and graduated!')\n            st.balloons()\n            validate(True)\n        else:\n            st.error(\"💥 Defeat! Your magical training didn't prepare you for physical combat.\")\n            st.write(f\"Your {strength} Strength wasn't enough without warrior training.\")\n            validate(False)\n\nwith col2:\n    if st.button(\"✨ Magical Attack\", use_container_width=True):\n        if discipline == 'mage':\n            st.success(\"🏆 Victory! Your magical mastery is supreme!\")\n            st.write(f\"Your {magic} Magic power defeats the Champion!\")\n            new_achievement('academy_master', 'Academy Master', 'You defeated the Champion and graduated!')\n            st.balloons()\n            validate(True)\n        else:\n            st.error(\"💥 Defeat! Your warrior training didn't include spellcasting.\")\n            st.write(f\"Your {magic} Magic wasn't enough without mage training.\")\n            validate(False)",
+          "depends_on": []
+        }
+      ],
+      "required_level": 4,
+      "depends_on": ["ready_for_mastery"]
+    }
+  }
+}
