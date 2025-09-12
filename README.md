@@ -2,7 +2,7 @@
 
 *Who knows where it might take you?*
 
-A flexible RPG-style framework to gamify almost anything and creating guided experiences with progressive unlocking, achievement systems, and customizable interactive challenges. Build anything from habit trackers to educational courses, interactive stories, or adventure games.
+A flexible RPG-style framework to gamify almost anything and create guided experiences with progressive unlocking, achievement systems, and customizable interactive challenges. Build anything from habit trackers to educational courses, interactive stories, or adventure games.
 
 ## Overview
 
