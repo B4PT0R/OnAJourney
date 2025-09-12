@@ -1,6 +1,8 @@
 # app.py
 # Main Streamlit app for RPG-style streak challenge
 
+from core.restrict_module import restrict_module
+restrict_module('streamlit',restricted_attributes=['secrets'])
 import streamlit as st
 from core.business import get_current_view, check_rerun
 from core.components import (
