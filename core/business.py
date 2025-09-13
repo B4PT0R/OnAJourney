@@ -741,9 +741,14 @@ def create_challenge_namespace(user: dict, chapter_num: int) -> dict:
         'IndexError': IndexError, 'AttributeError': AttributeError,
 
         #File-like
-        'BytesIO':io.BytesIO, "StringIO":io.StringIO
+        'BytesIO':io.BytesIO, "StringIO":io.StringIO,
+
+        #Dynamic execution (safe in a controlled namespace)
+        'exec':exec, 'compile':compile, 'eval':eval
     }
     
+    from core.editor import editor, info_bar, menu_bar, button
+
     namespace = {
         # Core RPG context (secure - no user object!)
         "st": st,
@@ -752,6 +757,9 @@ def create_challenge_namespace(user: dict, chapter_num: int) -> dict:
         "chapter_num": chapter_num,
         "new_achievement": new_achievement,
         "validate": None,  # Set by calling component
+
+        # Code editor widget (for convenience)
+        "editor": editor, "info_bar":info_bar, "menu_bar":menu_bar,"button":button,
         
         # Standard library modules
         "math": math, "random": random, "datetime": datetime, 
