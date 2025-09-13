@@ -15,7 +15,7 @@ from core.business import (
     calculate_challenge_xp,
     get_chapter_record, update_challenge_completion,
     validate_chapter, reset_journey, set_view, rerun, start_journey, 
-    get_xp_progress, is_journey_completed, create_empty_journey, save_journey_to_file, 
+    get_xp_progress, is_journey_completed, create_empty_journey, save_journey, 
     load_journey_for_editing, validate_journey_structure,
     get_challenge_weight, mark_intro_shown, create_challenge_namespace, update_user,
     can_validate_chapter, get_validation_credits, get_committed_chapter_for_level, 
@@ -190,14 +190,25 @@ def render_sidebar(user: dict):
 # ---------------------------- Journey Start Components ---------------------------- #
 
 def _render_journey_selection():
-    """Render journey selection interface"""
-    available_journeys = get_available_journeys()
+    """Render journey selection with official/personal separation"""
+    user = st.session_state.get('user')
+    available_journeys = get_available_journeys(user)
+    
     if not available_journeys:
-        st.error("No journeys found in journeys/ folder")
-        st.info("Place your JSON journey files in the journeys/ folder")
+        st.error("No journeys found")
         return None
     
-    journey_options = {journey["name"]: journey for journey in available_journeys}
+    # Créer les options pour le selectbox
+    journey_options = {}
+    for journey in available_journeys:
+        journey_options[journey["name"]] = journey
+    
+    # Interface de sélection
+    if not journey_options:
+        st.info("No journeys available")
+        return None
+    
+    # Sélecteur unique
     selected_journey_name = st.selectbox(
         "Choose your journey",
         options=list(journey_options.keys()),
@@ -207,7 +218,9 @@ def _render_journey_selection():
     selected_journey = journey_options[selected_journey_name]
     journey_structure = selected_journey["journey_structure"]
     
-    st.info(f"**{journey_structure.get('title', selected_journey['name'])}** - {selected_journey['chapter_count']} chapters")
+    # Affichage des infos
+    source_emoji = "📚" if selected_journey["source"] == "official" else "🎨"
+    st.info(f"{source_emoji} **{journey_structure.get('title', selected_journey['name'])}** - {selected_journey['chapter_count']} chapters")
     
     if journey_structure.get("description"):
         st.markdown(f"*{journey_structure['description']}*")
@@ -502,8 +515,6 @@ def _render_chapter_intro(chapter_record):
 
     if chapter_record.get("image"):
         show_image(chapter_record['image'])
-    else:
-        st.warning("No image to show")
     
     if chapter_record.get("intro"):
         st.markdown(chapter_record["intro"])
@@ -779,16 +790,29 @@ def _render_new_journey_form():
 
 def _render_existing_journey_selector():
     """Render selector for existing journeys"""
-    available_journeys = get_available_journeys()
+    user = st.session_state.get('user')
+    available_journeys = get_available_journeys(user)
+    
     if not available_journeys:
         st.info("No existing journeys found")
         return
     
-    journey_names = [journey["name"] + ".json" for journey in available_journeys]
-    selected_file = st.selectbox("Choose a journey to edit", journey_names)
+    # Options avec indication source ← SIMPLIFIÉ
+    journey_options = {}
+    for journey in available_journeys:
+        source_emoji = "📚" if journey["source"] == "official" else "🎨"
+        display_name = f"{source_emoji} {journey['name']}"
+        journey_options[display_name] = journey
+    
+    selected_display = st.selectbox("Choose a journey to edit", list(journey_options.keys()))
+    selected_journey_info = journey_options[selected_display]
     
     if st.button("Load for editing", type="primary"):
-        journey = load_journey_for_editing(selected_file)
+        journey = load_journey_for_editing(
+            selected_journey_info["name"], 
+            user, 
+            selected_journey_info["source"]
+        )
         if journey:
             st.session_state.editing_journey = journey
             st.rerun()
@@ -1129,7 +1153,7 @@ def _render_single_challenge_form(journey, chapter_num, challenge_idx, challenge
                 st.error(f"Syntax error in challenge code: {e}")
 
 def _render_save_controls(journey):
-    """Render save and validation controls"""
+    """Render save controls - always saves to personal collection"""
     # Validation
     errors = validate_journey_structure(journey)
     if errors:
@@ -1139,12 +1163,20 @@ def _render_save_controls(journey):
     else:
         st.success("Journey valid ✅")
     
-    # Save button centered
+    # Save info ← NOUVEAU
+    user = st.session_state.get('user')
+    if not user:
+        st.error("No user logged in!")
+        return
+    
+    # Save button
     _, c, _ = st.columns([30, 40, 30])
     with c:
         if st.button("💾 Save", type="secondary", use_container_width=True, disabled=len(errors) > 0):
-            if save_journey_to_file(journey):
-                st.success("Journey saved!")
+            filename = journey.get("title", "untitled").lower().replace(" ", "_")
+            if save_journey(journey, filename, user):
+                st.success("Journey saved to your collection!")
+                # ← SUPPRIMER la ligne del st.session_state.editing_journey
             else:
                 st.error("Error saving journey")
 

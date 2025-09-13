@@ -79,6 +79,7 @@ def create_user(username: str, password: str) -> dict:
         "start_date": None,
         "chapters": {},
         "active_journey_data": None,
+        'custom_journeys':{},
         "journey_name": None,
         "intro_shown": False,
         "avatar": {},
@@ -268,11 +269,12 @@ def is_challenge_accessible(user: dict, chapter_num: int, challenge_idx: int) ->
 
 # ---------------------------- Journeys ---------------------------- #
 
-def get_available_journeys() -> List[dict]:
-    """Get all available journeys from journeys/ directory"""
+def get_available_journeys(user: Optional[dict] = None) -> List[dict]:
+    """Get journeys from both filesystem (official) and user DB (personal)"""
     journeys = []
-    journey_files = glob.glob("journeys/*.json")
     
+    # 1. Official journeys from filesystem
+    journey_files = glob.glob("journeys/*.json")
     for file_path in journey_files:
         try:
             with open(file_path, 'r', encoding='utf-8') as f:
@@ -283,12 +285,31 @@ def get_available_journeys() -> List[dict]:
             
             journeys.append({
                 "name": journey_name,
+                "source": "official",  # ← NOUVEAU
                 "file_path": file_path,
                 "journey_structure": journey_structure,
                 "chapter_count": len(journey_structure["chapters"])
             })
         except Exception as e:
-            print(f"Error loading journey {file_path}: {e}")
+            print(f"Error loading official journey {file_path}: {e}")
+    
+    # 2. Personal journeys from user database  ← NOUVEAU BLOC
+    if user:
+        custom_journeys = user.get("custom_journeys", {})
+        for name, journey_data in custom_journeys.items():
+            try:
+                journey_structure = normalize_journey_structure(journey_data)
+                journeys.append({
+                    "name": name,
+                    "source": "personal",  # ← NOUVEAU
+                    "file_path": None,     # Pas de fichier
+                    "journey_structure": journey_structure,
+                    "chapter_count": len(journey_structure["chapters"]),
+                    "created_at": journey_data.get("created_at"),      # ← NOUVEAU
+                    "modified_at": journey_data.get("modified_at")     # ← NOUVEAU
+                })
+            except Exception as e:
+                print(f"Error loading personal journey {name}: {e}")
     
     return journeys
 
@@ -822,6 +843,31 @@ def create_empty_journey(name: str, chapters_count: int) -> dict:
         "chapters": chapters
     }
 
+def save_journey(journey: dict, filename: str, user: dict) -> bool:
+    """Save journey to user's personal collection (always)"""
+    try:
+        # Initialize custom journeys if needed
+        if "custom_journeys" not in user:
+            user["custom_journeys"] = {}
+        
+        # Add/update metadata
+        journey_data = {
+            **journey,
+            "created_at": journey.get("created_at", datetime.now().isoformat()),
+            "modified_at": datetime.now().isoformat()
+        }
+        
+        # Clean filename for key
+        clean_name = filename.replace('.json', '').replace(' ', '_').lower()
+        
+        user["custom_journeys"][clean_name] = journey_data
+        update_user(user)
+        return True
+        
+    except Exception as e:
+        print(f"Error saving journey: {e}")
+        return False
+
 def save_journey_to_file(journey: dict, filename: str = None) -> bool:
     """Save journey to journeys/ directory"""
     try:
@@ -854,14 +900,34 @@ def save_journey_to_file(journey: dict, filename: str = None) -> bool:
         print(f"Error saving journey: {e}")
         return False
 
-def load_journey_for_editing(filename: str) -> dict:
-    """Load a journey for editing"""
+def load_journey_for_editing(journey_name: str, user: dict, source: str = "official") -> dict:
+    """Load journey for editing - official journeys get cloned to personal"""
     try:
-        filepath = f"journeys/{filename}"
-        with open(filepath, 'r', encoding='utf-8') as f:
-            raw_data = json.load(f)
-        
-        return normalize_journey_structure(raw_data)
+        if source == "personal":
+            # Load from user's custom journeys
+            custom_journeys = user.get("custom_journeys", {})
+            if journey_name in custom_journeys:
+                return normalize_journey_structure(custom_journeys[journey_name])
+            else:
+                print(f"Personal journey {journey_name} not found")
+                return None
+                
+        else:
+            # Load from filesystem and auto-clone for editing ← NOUVEAU
+            filepath = f"journeys/{journey_name}"
+            if not filepath.endswith('.json'):
+                filepath += '.json'
+                
+            with open(filepath, 'r', encoding='utf-8') as f:
+                raw_data = json.load(f)
+            
+            journey = normalize_journey_structure(raw_data)
+            
+            # Mark as modified official journey ← NOUVEAU
+            journey["title"] = f"{journey['title']} (My Version)"  # Clear indication
+            
+            return journey
+            
     except Exception as e:
         print(f"Error loading journey: {e}")
         return None

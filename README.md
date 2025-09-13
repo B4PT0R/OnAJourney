@@ -165,7 +165,7 @@ if st.button("Attempt dangerous action"):
 - **Progression Engine**: XP calculation, level determination, and achievement tracking
 - **Accessibility Logic**: Centralized chapter/challenge access validation
 - **Journey Management**: Loading, parsing, and validation of journey files
-- **Challenge Execution**: Sandboxed Python code execution with game state access
+- **Challenge Execution**: secured sandboxed Python code execution with game state access
 - **Persistence**: TinyDB/MongoDB-based storage for user data and progress
 
 ## Configuration
