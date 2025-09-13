@@ -689,6 +689,7 @@ def create_challenge_namespace(user: dict, chapter_num: int) -> dict:
     import plotly.graph_objects
     import altair
     import sympy
+    import io
     
     # Optionals avec fallback
     try:
@@ -738,6 +739,9 @@ def create_challenge_namespace(user: dict, chapter_num: int) -> dict:
         # Common exceptions
         'ValueError': ValueError, 'TypeError': TypeError, 'KeyError': KeyError,
         'IndexError': IndexError, 'AttributeError': AttributeError,
+
+        #File-like
+        'BytesIO':io.BytesIO, "StringIO":io.StringIO
     }
     
     namespace = {
