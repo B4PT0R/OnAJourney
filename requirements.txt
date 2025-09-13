@@ -1,4 +1,13 @@
 streamlit
-tinydb  
+tinydb
 pymongo
 streamlit-code-editor
+plotly
+matplotlib
+seaborn
+altair
+numpy
+pandas
+sympy
+graphviz
+Pillow

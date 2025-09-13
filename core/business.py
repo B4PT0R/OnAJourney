@@ -10,6 +10,7 @@ from datetime import datetime, date, time, timedelta
 from typing import Dict, List, Optional, Any
 from zoneinfo import ZoneInfo
 from core.database import create_database
+from core.restrict_module import restrict_module
 
 # Database
 database = create_database()
@@ -661,7 +662,46 @@ def calculate_total_xp(user: dict) -> float:
 # ---------------------------- Challenge Execution with RPG Context ---------------------------- #
 
 def create_challenge_namespace(user: dict, chapter_num: int) -> dict:
-    """Create namespace for challenge execution with RPG context"""
+    """Create rich sandbox for challenges - secure but powerful"""
+    
+    # Restrictions minimales (juste éviter les accidents)
+    restrict_module('numpy', restricted_attributes=['save', 'savez', 'savetxt'])
+    restrict_module('pandas', restricted_attributes=['to_pickle', 'read_pickle'])
+    restrict_module('graphviz', restricted_attributes=['render', 'save'])
+    
+    # Modules essentiels
+    import math
+    import random
+    import datetime
+    import time
+    import json
+    import base64
+    import re
+    import statistics
+    import collections
+    
+    # Data science & visualization stack
+    import numpy
+    import pandas
+    import matplotlib.pyplot
+    import seaborn
+    import plotly.express
+    import plotly.graph_objects
+    import altair
+    import sympy
+    
+    # Optionals avec fallback
+    try:
+        import graphviz
+        graphviz_available = graphviz
+    except ImportError:
+        graphviz_available = None
+        
+    try:
+        from PIL import Image
+        pil_available = Image
+    except ImportError:
+        pil_available = None
     
     def new_achievement(achievement_id: str, title: str = None, description: str = None):
         """Helper function to unlock achievements from challenges"""
@@ -671,15 +711,67 @@ def create_challenge_namespace(user: dict, chapter_num: int) -> dict:
             if description:
                 st.info(description)
     
-    return {
+    # Inject calculated XP/level into avatar (read-only info)
+    xp_info = get_xp_progress(user)
+    avatar=user['avatar']
+    avatar["xp"] = xp_info["total_xp"]
+    avatar["level"] = xp_info["current_level"]
+    
+    # Essential built-ins for comfortable coding
+    essential_builtins = {
+        # Core types
+        'dict': dict, 'list': list, 'tuple': tuple, 'set': set,
+        'str': str, 'int': int, 'float': float, 'bool': bool,
+        
+        # Utilities
+        'range': range, 'len': len, 'type': type, 'isinstance': isinstance,
+        'min': min, 'max': max, 'sum': sum, 'abs': abs, 'round': round,
+        'all': all, 'any': any,
+        
+        # Iteration
+        'enumerate': enumerate, 'zip': zip, 'map': map, 'filter': filter,
+        'sorted': sorted, 'reversed': reversed,
+        
+        # Inspection/debug
+        'hasattr': hasattr, 'getattr': getattr, 'repr': repr,
+        
+        # Common exceptions
+        'ValueError': ValueError, 'TypeError': TypeError, 'KeyError': KeyError,
+        'IndexError': IndexError, 'AttributeError': AttributeError,
+    }
+    
+    namespace = {
+        # Core RPG context (secure - no user object!)
         "st": st,
-        "user": user,
-        "avatar": user["avatar"],
-        "world": user["world"],
+        "avatar": avatar,           # Contains XP/level for display
+        "world": user["world"],     # Story state
         "chapter_num": chapter_num,
         "new_achievement": new_achievement,
-        "validate": None  # Will be set by the calling component
+        "validate": None,  # Set by calling component
+        
+        # Standard library modules
+        "math": math, "random": random, "datetime": datetime, 
+        "time": time, "json": json, "base64": base64, "re": re,
+        "statistics": statistics, "collections": collections,
+        
+        # Data science & visualization
+        "numpy": numpy, "pandas": pandas,
+        "pyplot": matplotlib.pyplot, "seaborn": seaborn,
+        "plotly": plotly.express, "plotly_go": plotly.graph_objects,
+        "altair": altair, "sympy": sympy,
     }
+    
+    # Add essential built-ins
+    namespace.update(essential_builtins)
+    
+    # Add optional modules if available
+    if graphviz_available:
+        namespace["graphviz"] = graphviz_available
+    
+    if pil_available:
+        namespace["PIL_Image"] = pil_available
+    
+    return namespace
 
 # ---------------------------- Journey Editor ---------------------------- #
 
