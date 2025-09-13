@@ -684,12 +684,7 @@ def calculate_total_xp(user: dict) -> float:
 
 def create_challenge_namespace(user: dict, chapter_num: int) -> dict:
     """Create rich sandbox for challenges - secure but powerful"""
-    
-    # Restrictions minimales (juste éviter les accidents)
-    restrict_module('numpy', restricted_attributes=['save', 'savez', 'savetxt'])
-    restrict_module('pandas', restricted_attributes=['to_pickle', 'read_pickle'])
-    restrict_module('graphviz', restricted_attributes=['render', 'save'])
-    
+        
     # Modules essentiels
     import math
     import random
